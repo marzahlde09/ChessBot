@@ -1,5 +1,4 @@
 var board;
-initializeNewBoard();
 
 // returns a 2D array thats a copy of the current chess board
 // for the sake of checking legal moves
@@ -52,7 +51,7 @@ class R{
 		this.color = color;
 		// Knowing whether or not a rook has moved determines
 		// eligibility for Castling
-		hasMoved = false;
+		this.hasMoved = false;
 		// Side is 's' for short or 'l' for long for the sake of castling
 		this.side = side;
 	}
@@ -87,7 +86,7 @@ class Ki{
 		this.row = row;
 		this.col = col;
 		this.color = color;
-		hasMoved = false;
+		this.hasMoved = false;
 	}
 }
 
@@ -96,27 +95,23 @@ class Ki{
 // the 2D array contains [row, col] of possible
 // ending points
 function findLegalMoves(piece){
-	switch(typeof piece){
-		case 'P':
-			return findPawnMoves(piece);
-			break;
-		case 'R':
-			return findRookMoves(piece);
-			break;
-		case 'Kn':
-			return findKnightMoves(piece);
-			break;
-		case 'B':
-			return findBishopMoves(piece);
-			break;
-		case 'Q':
-			return findQueenMoves(piece);
-			break;
-		case 'Ki':
-			return findKingMoves(piece);
-			break;
-		default:
-			console.log('typeof not working as expected');
+	if(piece instanceof P){
+		return findPawnMoves(piece);
+	}
+	if(piece instanceof R){
+		return findRookMoves(piece);
+	}
+	if(piece instanceof Kn){
+		return findKnightMoves(piece);
+	}
+	if(piece instanceof B){
+		return findBishopMoves(piece);
+	}
+	if(piece instanceof Q){
+		return findQueenMoves(piece);
+	}
+	if(piece instanceof Ki){
+		return findKingMoves(piece);
 	}
 }
 
@@ -323,7 +318,7 @@ function findBishopMoves(piece){
 	let color = piece.color;
 	let row = piece.row;
 	let col = piece.col;
-	for(let i = row + 1, let j = col + 1; i < 8 && j < 8; i++, j++){
+	for(let i = row + 1, j = col + 1; i < 8 && j < 8; i++, j++){
 		if(board[i][j] == 'empty'){
 			moves.push([i, j]);
 		}
@@ -335,7 +330,7 @@ function findBishopMoves(piece){
 			break;
 		}
 	}
-	for(let i = row + 1, let j = col - 1; i < 8 && j >= 0; i++, j--){
+	for(let i = row + 1, j = col - 1; i < 8 && j >= 0; i++, j--){
 		if(board[i][j] == 'empty'){
 			moves.push([i, j]);
 		}
@@ -347,7 +342,7 @@ function findBishopMoves(piece){
 			break;
 		}
 	}
-	for(let i = row - 1, let j = col - 1; i >= 0 && j >= 0; i--, j--){
+	for(let i = row - 1, j = col - 1; i >= 0 && j >= 0; i--, j--){
 		if(board[i][j] == 'empty'){
 			moves.push([i, j]);
 		}
@@ -359,7 +354,7 @@ function findBishopMoves(piece){
 			break;
 		}
 	}
-	for(let i = row - 1, let j = col + 1; i >= 0 && j < 8; i--, j++){
+	for(let i = row - 1, j = col + 1; i >= 0 && j < 8; i--, j++){
 		if(board[i][j] == 'empty'){
 			moves.push([i, j]);
 		}
@@ -392,7 +387,7 @@ function findQueenMoves(piece){
 	let color = piece.color;
 	let row = piece.row;
 	let col = piece.col;
-	for(let i = row + 1, let j = col + 1; i < 8 && j < 8; i++, j++){
+	for(let i = row + 1, j = col + 1; i < 8 && j < 8; i++, j++){
 		if(board[i][j] == 'empty'){
 			moves.push([i, j]);
 		}
@@ -404,7 +399,7 @@ function findQueenMoves(piece){
 			break;
 		}
 	}
-	for(let i = row + 1, let j = col - 1; i < 8 && j >= 0; i++, j--){
+	for(let i = row + 1, j = col - 1; i < 8 && j >= 0; i++, j--){
 		if(board[i][j] == 'empty'){
 			moves.push([i, j]);
 		}
@@ -416,7 +411,7 @@ function findQueenMoves(piece){
 			break;
 		}
 	}
-	for(let i = row - 1, let j = col - 1; i >= 0 && j >= 0; i--, j--){
+	for(let i = row - 1, j = col - 1; i >= 0 && j >= 0; i--, j--){
 		if(board[i][j] == 'empty'){
 			moves.push([i, j]);
 		}
@@ -428,7 +423,7 @@ function findQueenMoves(piece){
 			break;
 		}
 	}
-	for(let i = row - 1, let j = col + 1; i >= 0 && j < 8; i--, j++){
+	for(let i = row - 1, j = col + 1; i >= 0 && j < 8; i--, j++){
 		if(board[i][j] == 'empty'){
 			moves.push([i, j]);
 		}
@@ -573,7 +568,7 @@ function inCheck(color){
 	let col = -1;
 	for(let i = 0; i < 8; i++){
 		for(let j = 0; j < 8; j++){
-			if(typeof board[i][j] == 'Ki' && board[i][j].color == color){
+			if(board[i][j] instanceof Ki && board[i][j].color == color){
 				row = i;
 				col = j;
 			}
@@ -583,13 +578,13 @@ function inCheck(color){
 	if(color == 'w'){
 		if(row - 1 >= 0
 		&& col - 1 >= 0
-		&& typeof board[row - 1][col - 1] == 'P'
+		&& board[row - 1][col - 1] instanceof P
 		&& board[row - 1][col - 1].color == 'b'){
 			return true;
 		}
 		if(row - 1 >= 0
 		&& col + 1 < 8
-		&& typeof board[row - 1][col + 1] == 'P'
+		&& board[row - 1][col + 1] instanceof P
 		&& board[row - 1][col + 1].color == 'b'){
 			return true;
 		}
@@ -597,137 +592,137 @@ function inCheck(color){
 	else{
 		if(row + 1 < 8
 		&& col - 1 >= 0
-		&& typeof board[row + 1][col - 1] == 'P'
+		&& board[row + 1][col - 1] instanceof P
 		&& board[row + 1][col - 1].color == 'w'){
 			return true;
 		}
 		if(row + 1 < 8
 		&& col + 1 < 8
-		&& typeof board[row + 1][col + 1] == 'P'
+		&& board[row + 1][col + 1] instanceof P
 		&& board[row + 1][col + 1].color == 'w'){
 			return true;
 		}
 	}
 	//check as if rook
 	for(let i = row + 1; i < 8; i++){
-		if((typeof board[i][col] == 'R' || typeof board[i][col] == 'Q')
+		if((board[i][col] instanceof R || board[i][col] instanceof Q)
 		&& board[i][col].color != color){
 			return true;
 		}
-		else if(typeof board[i][col] != 'empty'){
+		else if(typeof board[i][col] == 'object'){
 			break;
 		}
 	}
 	for(let i = row - 1; i >= 0; i--){
-		if((typeof board[i][col] == 'R' || typeof board[i][col] == 'Q')
+		if((board[i][col] instanceof R || board[i][col] instanceof Q)
 		&& board[i][col].color != color){
 			return true;
 		}
-		else if(typeof board[i][col] != 'empty'){
+		else if(typeof board[i][col] == 'object'){
 			break;
 		}
 	}
 	for(let i = col + 1; i < 8; i++){
-		if((typeof board[row][i] == 'R' || typeof board[row][i] == 'Q')
+		if((board[row][i] instanceof R || board[row][i] instanceof Q)
 		&& board[row][i].color != color){
 			return true;
 		}
-		else if(typeof board[row][i] != 'empty'){
+		else if(typeof board[row][i] == 'object'){
 			break;
 		}
 	}
 	for(let i = col - 1; i >= 0; i--){
-		if((typeof board[row][i] == 'R' || typeof board[row][i] == 'Q')
+		if((board[row][i] instanceof R || board[row][i] instanceof Q)
 		&& board[row][i].color != color){
 			return true;
 		}
-		else if(typeof board[row][i] != 'empty'){
+		else if(typeof board[row][i] == 'object'){
 			break;
 		}
 	}
 	//check as if Knight
 	if(col + 2 < 8){
 		if(row + 1 < 8
-		&& typeof board[row + 1][col + 2] == 'Kn'
+		&& board[row + 1][col + 2] instanceof Kn
 		&& board[row + 1][col + 2].color != color){
 			return true;
 		}
 		if(row - 1 >= 0
-		&& typeof board[row - 1][col + 2] == 'Kn'
+		&& board[row - 1][col + 2] instanceof Kn
 		&& board[row - 1][col + 2].color != color){
 			return true;
 		}
 	}
 	if(col - 2 >= 0){
 		if(row + 1 < 8
-		&& typeof board[row + 1][col - 2] == 'Kn'
+		&& board[row + 1][col - 2] instanceof Kn
 		&& board[row + 1][col - 2].color != color){
 			return true;
 		}
 		if(row - 1 >= 0
-		&& typeof board[row - 1][col - 2] == 'Kn'
+		&& board[row - 1][col - 2] instanceof Kn
 		&& board[row - 1][col - 2].color != color){
 			return true;
 		}
 	}
 	if(row + 2 < 8){
 		if(col + 1 < 8
-		&& typeof board[row + 2][col + 1] == 'Kn'
+		&& board[row + 2][col + 1] instanceof Kn
 		&& board[row + 2][col + 1].color != color){
 			return true;
 		}
 		if(col - 1 >= 0
-		&& typeof board[row + 2][col - 1] == 'Kn'
+		&& board[row + 2][col - 1] instanceof Kn
 		&& board[row + 2][col - 1].color != color){
 			return true;
 		}
 	}
 	if(row - 2 >= 0){
 		if(col + 1 < 8
-		&& typeof board[row - 2][col + 1] == 'Kn'
+		&& board[row - 2][col + 1] instanceof Kn
 		&& board[row - 2][col + 1].color != color){
 			return true;
 		}
 		if(col - 1 >= 0
-		&& typeof board[row - 2][col - 1] == 'Kn'
+		&& board[row - 2][col - 1] instanceof Kn
 		&& board[row - 2][col - 1].color != color){
 			return true;
 		}
 	}
 	//check as if Bishop
-	for(let i = row + 1, let j = col + 1; i < 8 && j < 8; i++, j++){
-		if((typeof board[i][j] == 'B' || typeof board[i][j] == 'Q')
+	for(let i = row + 1, j = col + 1; i < 8 && j < 8; i++, j++){
+		if((board[i][j] instanceof B || board[i][j] instanceof Q)
 		&& board[i][j].color != color){
 			return true;
 		}
-		else if(typeof board[i][j] != 'empty'){
+		else if(typeof board[i][j] == 'object'){
 			break;
 		}
 	}
-	for(let i = row + 1, let j = col - 1; i < 8 && j >= 0; i++, j--){
-		if((typeof board[i][j] == 'B' || typeof board[i][j] == 'Q')
+	for(let i = row + 1, j = col - 1; i < 8 && j >= 0; i++, j--){
+		if((board[i][j] instanceof B || board[i][j] instanceof Q)
 		&& board[i][j].color != color){
 			return true;
 		}
-		else if(typeof board[i][j] != 'empty'){
+		else if(typeof board[i][j] == 'object'){
 			break;
 		}
 	}
-	for(let i = row - 1, let j = col - 1; i >= 0 && j >= 0; i--, j--){
-		if((typeof board[i][j] == 'B' || typeof board[i][j] == 'Q')
+	for(let i = row - 1, j = col - 1; i >= 0 && j >= 0; i--, j--){
+		if((board[i][j] instanceof B || board[i][j] instanceof Q)
 		&& board[i][j].color != color){
 			return true;
 		}
-		else if(typeof board[i][j] != 'empty'){
+		else if(typeof board[i][j] == 'object'){
 			break;
 		}
 	}
-	for(let i = row - 1, let j = col + 1; i >= 0 && j < 8; i--, j++){
-		if((typeof board[i][j] == 'B' || typeof board[i][j] == 'Q')
+	for(let i = row - 1, j = col + 1; i >= 0 && j < 8; i--, j++){
+		if((board[i][j] instanceof B || board[i][j] instanceof Q)
 		&& board[i][j].color != color){
 			return true;
 		}
-		else if(typeof board[i][j] != 'empty'){
+		else if(typeof board[i][j] == 'object'){
 			break;
 		}
 	}
@@ -735,43 +730,96 @@ function inCheck(color){
 	//Check as if king
 	if(row + 1 < 8
 	&& col + 1 < 8
-	&& typeof board[row + 1][col + 1] == 'Ki'){
+	&& board[row + 1][col + 1] instanceof Ki){
 		return true;
 	}
 	if(row + 1 < 8
 	&& col - 1 >= 0
-	&& typeof board[row + 1][col - 1] == 'Ki'){
+	&& board[row + 1][col - 1] instanceof Ki){
 		return true;
 	}
 	if(row - 1 >= 0
 	&& col - 1 >= 0
-	&& typeof board[row - 1][col - 1] == 'Ki'){
+	&& board[row - 1][col - 1] instanceof Ki){
 		return true;
 	}
 	if(row - 1 >= 0
 	&& col + 1 < 8
-	&& typeof board[row - 1][col + 1] == 'Ki'){
+	&& board[row - 1][col + 1] instanceof Ki){
 		return true;
 	}
 	if(row + 1 < 8
-	&& typeof board[row + 1][col] == 'Ki'){
+	&& board[row + 1][col] instanceof Ki){
 		return true;
 	}
 	if(row - 1 >= 0
-	&& typeof board[row - 1][col] == 'Ki'){
+	&& board[row - 1][col] instanceof Ki){
 		return true;
 	}
 	if(col + 1 < 8
-	&& typeof board[row][col + 1] == 'Ki'){
+	&& board[row][col + 1] instanceof Ki){
 		return true;
 	}
 	if(col - 1 >= 0
-	&& typeof board[row][col - 1] == 'Ki'){
+	&& board[row][col - 1] instanceof Ki){
 		return true;
 	}
 	//at this point, we can assume the king is not in check
 	return false;
 };
+
+// Initializes board and adds images and background colors to
+// appropriate html cells
+function startGame(){
+	initializeNewBoard();
+	for(let i = 0; i < board.length; i++){
+		for(let j = 0; j < board[0].length; j++){
+			if((i + j) % 2 == 0){
+				document.getElementById(String(i)+String(j)).bgColor = "LightGray";
+			}
+			if(typeof board[i][j] == 'object' && board[i][j].color == 'w'){
+				if(board[i][j] instanceof P){
+					document.getElementById(String(i)+String(j)).innerHTML = '<img src="content/white_pawn.png" style="height: 40px"/>';
+				}
+				if(board[i][j] instanceof R){
+					document.getElementById(String(i)+String(j)).innerHTML = '<img src="content/white_rook.png" style="height: 40px"/>';
+				}
+				if(board[i][j] instanceof Kn){
+					document.getElementById(String(i)+String(j)).innerHTML = '<img src="content/white_knight.png" style="height: 40px"/>';
+				}
+				if(board[i][j] instanceof B){
+					document.getElementById(String(i)+String(j)).innerHTML = '<img src="content/white_bishop.png" style="height: 40px"/>';
+				}
+				if(board[i][j] instanceof Q){
+					document.getElementById(String(i)+String(j)).innerHTML = '<img src="content/white_queen.png" style="height: 40px"/>';
+				}
+				if(board[i][j] instanceof Ki){
+					document.getElementById(String(i)+String(j)).innerHTML = '<img src="content/white_king.png" style="height: 40px"/>';
+				}
+			}
+			else if(typeof board[i][j] == 'object' && board[i][j].color == 'b'){
+				if(board[i][j] instanceof P){
+					document.getElementById(String(i)+String(j)).innerHTML = '<img src="content/black_pawn.png" style="height: 40px"/>';
+				}
+				if(board[i][j] instanceof R){
+					document.getElementById(String(i)+String(j)).innerHTML = '<img src="content/black_rook.png" style="height: 40px"/>';
+				}
+				if(board[i][j] instanceof Kn){
+					document.getElementById(String(i)+String(j)).innerHTML = '<img src="content/black_knight.png" style="height: 40px"/>';
+				}
+				if(board[i][j] instanceof B){
+					document.getElementById(String(i)+String(j)).innerHTML = '<img src="content/black_bishop.png" style="height: 40px"/>';
+				}
+				if(board[i][j] instanceof Q){
+					document.getElementById(String(i)+String(j)).innerHTML = '<img src="content/black_queen.png" style="height: 40px"/>';
+				}
+				if(board[i][j] instanceof Ki){
+					document.getElementById(String(i)+String(j)).innerHTML = '<img src="content/black_king.png" style="height: 40px"/>';
+				}
+			}
+		}
+	}
+}
 	
-		
-		
+	
+	

@@ -7,98 +7,102 @@
 				text-align: center;
 				vertical-align: middle;
 			}
+			table, th, td {
+				border: 1px solid black;
+				border-collapse: collapse;
+			}
 		</style>
 	</head>
-	<body>
+	<body onload="startGame()">
 		<h1>Chess</h1>
-		<table style="width: 100%">
+		<table style="width: 600px; height: 600px">
 			<tr style="height: 11%">
-				<th style="width: 12%">8<th>
-				<td style="width: 11%" id="00"></td>
-				<td style="width: 11%" id="01"></td>
-				<td style="width: 11%" id="02"></td>
-				<td style="width: 11%" id="03"></td>
-				<td style="width: 11%" id="04"></td>
-				<td style="width: 11%" id="05"></td>
-				<td style="width: 11%" id="06"></td>
-				<td style="width: 11%" id="07"></td>
+				<th style="width: 12%">8</th>
+				<td style="width: 11%" id="00" onclick="spaceClicked()"></td>
+				<td style="width: 11%" id="01" onclick="spaceClicked()"></td>
+				<td style="width: 11%" id="02" onclick="spaceClicked()"></td>
+				<td style="width: 11%" id="03" onclick="spaceClicked()"></td>
+				<td style="width: 11%" id="04" onclick="spaceClicked()"></td>
+				<td style="width: 11%" id="05" onclick="spaceClicked()"></td>
+				<td style="width: 11%" id="06" onclick="spaceClicked()"></td>
+				<td style="width: 11%" id="07" onclick="spaceClicked()"></td>
 			</tr>
 			<tr style="height: 11%">
-				<th>7<th>
-				<td id="10"></td>
-				<td id="11"></td>
-				<td id="12"></td>
-				<td id="13"></td>
-				<td id="14"></td>
-				<td id="15"></td>
-				<td id="16"></td>
-				<td id="17"></td>
+				<th>7</th>
+				<td id="10" onclick="spaceClicked()"></td>
+				<td id="11" onclick="spaceClicked()"></td>
+				<td id="12" onclick="spaceClicked()"></td>
+				<td id="13" onclick="spaceClicked()"></td>
+				<td id="14" onclick="spaceClicked()"></td>
+				<td id="15" onclick="spaceClicked()"></td>
+				<td id="16" onclick="spaceClicked()"></td>
+				<td id="17" onclick="spaceClicked()"></td>
 			</tr>
 			<tr style="height: 11%">
-				<th>6<th>
-				<td id="20"></td>
-				<td id="21"></td>
-				<td id="22"></td>
-				<td id="23"></td>
-				<td id="24"></td>
-				<td id="25"></td>
-				<td id="26"></td>
-				<td id="27"></td>
+				<th>6</th>
+				<td id="20" onclick="spaceClicked()"></td>
+				<td id="21" onclick="spaceClicked()"></td>
+				<td id="22" onclick="spaceClicked()"></td>
+				<td id="23" onclick="spaceClicked()"></td>
+				<td id="24" onclick="spaceClicked()"></td>
+				<td id="25" onclick="spaceClicked()"></td>
+				<td id="26" onclick="spaceClicked()"></td>
+				<td id="27" onclick="spaceClicked()"></td>
 			</tr>
 			<tr style="height: 11%">
-				<th>5<th>
-				<td id="30"></td>
-				<td id="31"></td>
-				<td id="32"></td>
-				<td id="33"></td>
-				<td id="34"></td>
-				<td id="35"></td>
-				<td id="36"></td>
-				<td id="37"></td>
+				<th>5</th>
+				<td id="30" onclick="spaceClicked()"></td>
+				<td id="31" onclick="spaceClicked()"></td>
+				<td id="32" onclick="spaceClicked()"></td>
+				<td id="33" onclick="spaceClicked()"></td>
+				<td id="34" onclick="spaceClicked()"></td>
+				<td id="35" onclick="spaceClicked()"></td>
+				<td id="36" onclick="spaceClicked()"></td>
+				<td id="37" onclick="spaceClicked()"></td>
 			</tr>
 			<tr style="height: 11%">
-				<th>4<th>
-				<td id="40"></td>
-				<td id="41"></td>
-				<td id="42"></td>
-				<td id="43"></td>
-				<td id="44"></td>
-				<td id="45"></td>
-				<td id="46"></td>
-				<td id="47"></td>
+				<th>4</th>
+				<td id="40" onclick="spaceClicked()"></td>
+				<td id="41" onclick="spaceClicked()"></td>
+				<td id="42" onclick="spaceClicked()"></td>
+				<td id="43" onclick="spaceClicked()"></td>
+				<td id="44" onclick="spaceClicked()"></td>
+				<td id="45" onclick="spaceClicked()"></td>
+				<td id="46" onclick="spaceClicked()"></td>
+				<td id="47" onclick="spaceClicked()"></td>
 			</tr>
 			<tr style="height: 11%">
-				<th>3<th>
-				<td id="50"></td>
-				<td id="51"></td>
-				<td id="52"></td>
-				<td id="53"></td>
-				<td id="54"></td>
-				<td id="55"></td>
-				<td id="56"></td>
-				<td id="57"></td>
+				<th>3</th>
+				<td id="50" onclick="spaceClicked()"></td>
+				<td id="51" onclick="spaceClicked()"></td>
+				<td id="52" onclick="spaceClicked()"></td>
+				<td id="53" onclick="spaceClicked()"></td>
+				<td id="54" onclick="spaceClicked()"></td>
+				<td id="55" onclick="spaceClicked()"></td>
+				<td id="56" onclick="spaceClicked()"></td>
+				<td id="57" onclick="spaceClicked()"></td>
 			</tr>
 			<tr style="height: 11%">
-				<th>2<th>
-				<td id="60"></td>
-				<td id="61"></td>
-				<td id="62"></td>
-				<td id="63"></td>
-				<td id="64"></td>
-				<td id="65"></td>
-				<td id="66"></td>
-				<td id="67"></td>
+				<th>2</th>
+				<td id="60" onclick="spaceClicked()"></td>
+				<td id="61" onclick="spaceClicked()"></td>
+				<td id="62" onclick="spaceClicked()"></td>
+				<td id="63" onclick="spaceClicked()"></td>
+				<td id="64" onclick="spaceClicked()"></td>
+				<td id="65" onclick="spaceClicked()"></td>
+				<td id="66" onclick="spaceClicked()"></td>
+				<td id="67" onclick="spaceClicked()"></td>
 			</tr>
 			<tr style="height: 11%">
-				<th>1<th>
-				<td id="70"></td>
-				<td id="71"></td>
-				<td id="72"></td>
-				<td id="73"></td>
-				<td id="74"></td>
-				<td id="75"></td>
-				<td id="76"></td>
-				<td id="77"></td>
+				<th>1</th>
+				<td id="70" onclick="spaceClicked()"></td>
+				<td id="71" onclick="spaceClicked()"></td>
+				<td id="72" onclick="spaceClicked()"></td>
+				<td id="73" onclick="spaceClicked()"></td>
+				<td id="74" onclick="spaceClicked()"></td>
+				<td id="75" onclick="spaceClicked()"></td>
+				<td id="76" onclick="spaceClicked()"></td>
+				<td id="77" onclick="spaceClicked()"></td>
 			</tr>
 			<tr style="height: 12%">
 				<td></td>
