@@ -2,6 +2,8 @@ var board;
 var turn;
 var selectedPiece;
 var movementOptions;
+// last move is formatted as piece-.-color-start row-start col-end row-end col
+var lastMove;
 
 // returns a 2D array thats a copy of the current chess board
 // for the sake of checking legal moves
@@ -27,14 +29,14 @@ function copyBoard(){
 // sets up a new chess board with black on rows 0-1 and white on rows 6-7
 function initializeNewBoard(){
 	board = [
-		[new R(0,0,'b','l'), new Kn(0,1,'b'), new B(0,2,'b'), new Q(0,3,'b'), new Ki(0,4,'b'), new B(0,5,'b'), new Kn(0,6,'b'), new R(0,7,'b','s')],
+		[new R(0,0,'b',false), new Kn(0,1,'b'), new B(0,2,'b'), new Q(0,3,'b'), new Ki(0,4,'b'), new B(0,5,'b'), new Kn(0,6,'b'), new R(0,7,'b',false)],
 		[new P(1,0,'b'), new P(1,1,'b'), new P(1,2,'b'), new P(1,3,'b'), new P(1,4,'b'), new P(1,5,'b'), new P(1,6,'b'), new P(1,7,'b'),],
 		['empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
 		['empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
 		['empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
 		['empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty'],
 		[new P(6,0,'w'), new P(6,1,'w'), new P(6,2,'w'), new P(6,3,'w'), new P(6,4,'w'), new P(6,5,'w'), new P(6,6,'w'), new P(6,7,'w'),],
-		[new R(7,0,'w','l'), new Kn(7,1,'w'), new B(7,2,'w'), new Q(7,3,'w'), new Ki(7,4,'w'), new B(7,5,'w'), new Kn(7,6,'w'), new R(7,7,'w','s')]
+		[new R(7,0,'w',false), new Kn(7,1,'w'), new B(7,2,'w'), new Q(7,3,'w'), new Ki(7,4,'w'), new B(7,5,'w'), new Kn(7,6,'w'), new R(7,7,'w',false)]
 	];
 }
 
@@ -48,15 +50,13 @@ class P{
 }
 
 class R{
-	constructor(row, col, color, side){
+	constructor(row, col, color, hasMoved){
 		this.row = row;
 		this.col = col;
 		this.color = color;
 		// Knowing whether or not a rook has moved determines
 		// eligibility for Castling
-		this.hasMoved = false;
-		// Side is 's' for short or 'l' for long for the sake of castling
-		this.side = side;
+		this.hasMoved = hasMoved;
 	}
 }
 
@@ -164,6 +164,22 @@ function findPawnMoves(piece){
 		&& board[row - 2][col] == 'empty'){
 			moves.push([row - 2, col]);
 		}
+		if(row == 3){
+			let lastMovePiece = lastMove.substring(0, lastMove.indexOf('.'));
+			if(lastMovePiece == 'P'){
+				let lastMoveRowStart = Number(lastMove.substring(lastMove.indexOf('.') + 2, lastMove.indexOf('.') + 3));
+				let lastMoveColStart = Number(lastMove.substring(lastMove.indexOf('.') + 3, lastMove.indexOf('.') + 4));
+				let lastMoveRowEnd = Number(lastMove.substring(lastMove.indexOf('.') + 4, lastMove.indexOf('.') + 5));
+				if(lastMoveRowStart == 1 && lastMoveRowEnd == 3){
+					if(lastMoveColStart == col - 1){
+						moves.push([row - 1, col - 1]);
+					}
+					if(lastMoveColStart == col + 1){
+						moves.push([row - 1, col + 1]);
+					}
+				}
+			}
+		}
 	}
 	else{
 		if(col - 1 >= 0
@@ -183,6 +199,22 @@ function findPawnMoves(piece){
 		&& board[row + 1][col] == 'empty'
 		&& board[row + 2][col] == 'empty'){
 			moves.push([row + 2, col]);
+		}
+		if(row == 4){
+			let lastMovePiece = lastMove.substring(0, lastMove.indexOf('.'));
+			if(lastMovePiece == 'P'){
+				let lastMoveRowStart = Number(lastMove.substring(lastMove.indexOf('.') + 2, lastMove.indexOf('.') + 3));
+				let lastMoveColStart = Number(lastMove.substring(lastMove.indexOf('.') + 3, lastMove.indexOf('.') + 4));
+				let lastMoveRowEnd = Number(lastMove.substring(lastMove.indexOf('.') + 4, lastMove.indexOf('.') + 5));
+				if(lastMoveRowStart == 6 && lastMoveRowEnd == 4){
+					if(lastMoveColStart == col - 1){
+						moves.push([row + 1, col - 1]);
+					}
+					if(lastMoveColStart == col + 1){
+						moves.push([row + 1, col + 1]);
+					}
+				}
+			}
 		}
 	}
 	let index = Number(0);
@@ -568,6 +600,30 @@ function findKingMoves(piece){
 	&& (board[row][col - 1] == 'empty' || board[row][col - 1].color != color)){
 		moves.push([row, col - 1]);
 	}
+	if(!piece.hasMoved && !inCheck(board, color)){
+		if(board[row][0] instanceof R
+		&& !board[row][0].hasMoved
+		&& board[row][1] == 'empty'
+		&& board[row][2] == 'empty'
+		&& board[row][3] == 'empty'){
+			let tempBoard = copyBoard();
+			tempBoard[row][3] = new Ki(row, 3, color);
+			if(!inCheck(tempBoard, color)){
+				moves.push([row, 2]);
+			}
+		}
+		if(board[row][7] instanceof R
+		&& !board[row][7].hasMoved
+		&& board[row][5] == 'empty'
+		&& board[row][6] == 'empty'){
+			let tempBoard = copyBoard();
+			tempBoard[row][5] = new Ki(row, 5, color);
+			if(!inCheck(tempBoard, color)){
+				moves.push([row, 6]);
+			}
+		}
+	}
+	console.log(moves);
 	let index = 0;
 	while(index < moves.length){
 		let tempBoard = copyBoard();
@@ -754,38 +810,46 @@ function inCheck(boardToCheck, color){
 	//Check as if king
 	if(row + 1 < 8
 	&& col + 1 < 8
-	&& boardToCheck[row + 1][col + 1] instanceof Ki){
+	&& boardToCheck[row + 1][col + 1] instanceof Ki
+	&& boardToCheck[row + 1][col + 1].color != color){
 		return true;
 	}
 	if(row + 1 < 8
 	&& col - 1 >= 0
-	&& boardToCheck[row + 1][col - 1] instanceof Ki){
+	&& boardToCheck[row + 1][col - 1] instanceof Ki
+	&& boardToCheck[row + 1][col - 1].color != color){
 		return true;
 	}
 	if(row - 1 >= 0
 	&& col - 1 >= 0
-	&& boardToCheck[row - 1][col - 1] instanceof Ki){
+	&& boardToCheck[row - 1][col - 1] instanceof Ki
+	&& boardToCheck[row - 1][col - 1].color != color){
 		return true;
 	}
 	if(row - 1 >= 0
 	&& col + 1 < 8
-	&& boardToCheck[row - 1][col + 1] instanceof Ki){
+	&& boardToCheck[row - 1][col + 1] instanceof Ki
+	&& boardToCheck[row - 1][col + 1].color != color){
 		return true;
 	}
 	if(row + 1 < 8
-	&& boardToCheck[row + 1][col] instanceof Ki){
+	&& boardToCheck[row + 1][col] instanceof Ki
+	&& boardToCheck[row + 1][col].color != color){
 		return true;
 	}
 	if(row - 1 >= 0
-	&& boardToCheck[row - 1][col] instanceof Ki){
+	&& boardToCheck[row - 1][col] instanceof Ki
+	&& boardToCheck[row - 1][col].color != color){
 		return true;
 	}
 	if(col + 1 < 8
-	&& boardToCheck[row][col + 1] instanceof Ki){
+	&& boardToCheck[row][col + 1] instanceof Ki
+	&& boardToCheck[row][col + 1].color != color){
 		return true;
 	}
 	if(col - 1 >= 0
-	&& boardToCheck[row][col - 1] instanceof Ki){
+	&& boardToCheck[row][col - 1] instanceof Ki
+	&& boardToCheck[row][col - 1].color != color){
 		return true;
 	}
 	//at this point, we can assume the king is not in check
@@ -804,10 +868,10 @@ function drawBoard(){
 	for(let i = 0; i < board.length; i++){
 		for(let j = 0; j < board[0].length; j++){
 			if((i + j) % 2 == 0){
-				document.getElementById(String(i)+String(j)).bgColor = "LightGray";
+				document.getElementById(String(i)+String(j)).bgColor = "White";
 			}
 			else{
-				document.getElementById(String(i)+String(j)).bgColor = "White";
+				document.getElementById(String(i)+String(j)).bgColor = "LightGray";
 			}
 			if(typeof board[i][j] == 'object' && board[i][j].color == 'w'){
 				if(board[i][j] instanceof P){
@@ -856,7 +920,6 @@ function drawBoard(){
 	}
 }
 	
-	
 function spaceClicked(){
 	let id = event.target.id;
 	if(id == ''){
@@ -887,7 +950,18 @@ function spaceClicked(){
 	else if(selectedPiece != null){
 		for(let i = 0; i < movementOptions.length; i++){
 			if(row == movementOptions[i][0] && col == movementOptions[i][1]){
-				movePiece(selectedPiece, row, col);
+				if(selectedPiece instanceof P
+				&& selectedPiece.col != col
+				&& board[row][col] == 'empty'){
+					enPassant(selectedPiece, row, col);
+				}
+				else if(selectedPiece instanceof Ki
+				&& Math.abs(selectedPiece.col - col) == 2){
+					castle(selectedPiece, row, col);
+				}
+				else{
+					movePiece(selectedPiece, row, col);
+				}
 				if(turn == 'w'){
 					turn = 'b';
 				}
@@ -907,6 +981,26 @@ function movePiece(piece, targetRow, targetCol){
 	let startRow = piece.row;
 	let startCol = piece.col;
 	let color = piece.color;
+	if(piece instanceof P){
+		lastMove = 'P.'+color+startRow+startCol+targetRow+targetCol;
+	}
+	if(piece instanceof R){
+		piece.hasMoved = true;
+		lastMove = 'R.'+color+startRow+startCol+targetRow+targetCol;
+	}
+	if(piece instanceof Kn){
+		lastMove = 'Kn.'+color+startRow+startCol+targetRow+targetCol;
+	}
+	if(piece instanceof B){
+		lastMove = 'B.'+color+startRow+startCol+targetRow+targetCol;
+	}
+	if(piece instanceof Q){
+		lastMove = 'Q.'+color+startRow+startCol+targetRow+targetCol;
+	}
+	if(piece instanceof Ki){
+		piece.hasMoved = true;
+		lastMove = 'Ki.'+color+startRow+startCol+targetRow+targetCol;
+	}
 	board[targetRow][targetCol] = piece;
 	board[startRow][startCol] = 'empty';
 	piece.row = targetRow;
@@ -939,3 +1033,94 @@ function movePiece(piece, targetRow, targetCol){
 		}
 	}
 }
+
+function enPassant(piece, targetRow, targetCol){
+	let startRow = piece.row;
+	let startCol = piece.col;
+	let color = piece.color;
+	lastMove = 'P.'+color+startRow+startCol+targetRow+targetCol;
+	board[targetRow][targetCol] = piece;
+	board[startRow][startCol] = 'empty';
+	if(color == 'w'){
+		board[targetRow + 1][targetCol] = 'empty';
+	}
+	else{
+		board[targetRow - 1][targetCol] = 'empty';
+	}
+	piece.row = targetRow;
+	piece.col = targetCol;
+	selectedPiece = null;
+	movementOptions = null;
+	drawBoard();
+	if(color == 'w'){
+		if(inCheck(board, 'b')
+		&& findAllLegalMoves('b').length > 0){
+			document.getElementById('check_alert').innerHTML = 'Black is in check!';
+		}
+		else if(inCheck(board, 'b')){
+			document.getElementById('check_alert').innerHTML = 'Black is in checkmate!  White wins!';
+		}
+		else{
+			document.getElementById('check_alert').innerHTML = '';
+		}
+	}
+	else{
+		if(inCheck(board, 'w')
+		&& findAllLegalMoves('w').length > 0){
+			document.getElementById('check_alert').innerHTML = 'White is in check!';
+		}
+		else if(inCheck(board, 'w')){
+			document.getElementById('check_alert').innerHTML = 'White is in checkmate!  Black wins!';
+		}
+		else{
+			document.getElementById('check_alert').innerHTML = '';
+		}
+	}
+}
+
+function castle(piece, targetRow, targetCol){
+	let startRow = piece.row;
+	let startCol = piece.col;
+	let color = piece.color;
+	lastMove = 'Ki.'+color+startRow+startCol+targetRow+targetCol;
+	board[targetRow][targetCol] = piece;
+	if(targetCol < startCol){
+		board[targetRow][0] = 'empty';
+		board[targetRow][targetCol + 1] = new R(targetRow, targetCol + 1, color, true);
+	}
+	else{
+		board[targetRow][7] = 'empty';
+		board[targetRow][targetCol - 1] = new R(targetRow, targetCol - 1, color, true);
+	}
+	board[startRow][startCol] = 'empty';
+	piece.row = targetRow;
+	piece.col = targetCol;
+	selectedPiece = null;
+	movementOptions = null;
+	drawBoard();
+	if(color == 'w'){
+		if(inCheck(board, 'b')
+		&& findAllLegalMoves('b').length > 0){
+			document.getElementById('check_alert').innerHTML = 'Black is in check!';
+		}
+		else if(inCheck(board, 'b')){
+			document.getElementById('check_alert').innerHTML = 'Black is in checkmate!  White wins!';
+		}
+		else{
+			document.getElementById('check_alert').innerHTML = '';
+		}
+	}
+	else{
+		if(inCheck(board, 'w')
+		&& findAllLegalMoves('w').length > 0){
+			document.getElementById('check_alert').innerHTML = 'White is in check!';
+		}
+		else if(inCheck(board, 'w')){
+			document.getElementById('check_alert').innerHTML = 'White is in checkmate!  Black wins!';
+		}
+		else{
+			document.getElementById('check_alert').innerHTML = '';
+		}
+	}
+}
+	
