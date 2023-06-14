@@ -1,4 +1,7 @@
 var board;
+var turn;
+var selectedPiece;
+var movementOptions;
 
 // returns a 2D array thats a copy of the current chess board
 // for the sake of checking legal moves
@@ -137,12 +140,12 @@ function findPawnMoves(piece){
 			moves.push([row - 1, col + 1]);
 		}
 		if(board[row - 1][col] == 'empty'){
-			moves.push([row - 1][col]);
+			moves.push([row - 1, col]);
 		}
 		if(row == 6
 		&& board[row - 1][col] == 'empty'
 		&& board[row - 2][col] == 'empty'){
-			moves.push([row - 2][col]);
+			moves.push([row - 2, col]);
 		}
 	}
 	else{
@@ -157,20 +160,20 @@ function findPawnMoves(piece){
 			moves.push([row + 1, col + 1]);
 		}
 		if(board[row + 1][col] == 'empty'){
-			moves.push([row + 1][col]);
+			moves.push([row + 1, col]);
 		}
 		if(row == 1
 		&& board[row + 1][col] == 'empty'
 		&& board[row + 2][col] == 'empty'){
-			moves.push([row + 2][col]);
+			moves.push([row + 2, col]);
 		}
 	}
-	let index = 0;
+	let index = Number(0);
 	while(index < moves.length){
 		let tempBoard = copyBoard();
 		tempBoard[moves[index][0]][moves[index][1]] = new P(moves[index][0],moves[index][1],color);
 		tempBoard[row][col] = 'empty';
-		if(inCheck(color)){
+		if(inCheck(tempBoard, color)){
 			moves.splice(index,1);
 		}
 		else{
@@ -191,7 +194,7 @@ function findRookMoves(piece){
 		if(board[i][col] == 'empty'){
 			moves.push([i, col]);
 		}
-		else if(board[i][col].color != this.color){
+		else if(board[i][col].color != color){
 			moves.push([i, col]);
 			break;
 		}
@@ -203,7 +206,7 @@ function findRookMoves(piece){
 		if(board[i][col] == 'empty'){
 			moves.push([i, col]);
 		}
-		else if(board[i][col].color != this.color){
+		else if(board[i][col].color != color){
 			moves.push([i, col]);
 			break;
 		}
@@ -215,7 +218,7 @@ function findRookMoves(piece){
 		if(board[row][i] == 'empty'){
 			moves.push([row, i]);
 		}
-		else if(board[row][i].color != this.color){
+		else if(board[row][i].color != color){
 			moves.push([row, i]);
 			break;
 		}
@@ -227,7 +230,7 @@ function findRookMoves(piece){
 		if(board[row][i] == 'empty'){
 			moves.push([row, i]);
 		}
-		else if(board[row][i].color != this.color){
+		else if(board[row][i].color != color){
 			moves.push([row, i]);
 			break;
 		}
@@ -238,9 +241,9 @@ function findRookMoves(piece){
 	let index = 0;
 	while(index < moves.length){
 		let tempBoard = copyBoard();
-		tempBoard[moves[index][0]][moves[index][1]] = new P(moves[index][0],moves[index][1],color);
+		tempBoard[moves[index][0]][moves[index][1]] = new R(moves[index][0],moves[index][1],color);
 		tempBoard[row][col] = 'empty';
-		if(inCheck(color)){
+		if(inCheck(tempBoard, color)){
 			moves.splice(index,1);
 		}
 		else{
@@ -259,49 +262,50 @@ function findKnightMoves(piece){
 	let col = piece.col;
 	if(col + 2 < 8){
 		if(row + 1 < 8
-		&& (board[row + 1][col + 2] == 'empty' || board[row + 1][col + 2].color != this.color)){
-			moves.push(row + 1, col + 2);
+		&& (board[row + 1][col + 2] == 'empty' || board[row + 1][col + 2].color != color)){
+			moves.push([row + 1, col + 2]);
 		}
 		if(row - 1 >= 0
-		&& (board[row - 1][col + 2] == 'empty' || board[row - 1][col + 2].color != this.color)){
-			possibleMoves.push(row - 1, col + 2);
+		&& (board[row - 1][col + 2] == 'empty' || board[row - 1][col + 2].color != color)){
+			moves.push([row - 1, col + 2]);
 		}
 	}
 	if(col - 2 >= 0){
 		if(row + 1 < 8
-		&& (board[row + 1][col - 2] == 'empty' || board[row + 1][col - 2].color != this.color)){
-			moves.push(row + 1, col - 2);
+		&& (board[row + 1][col - 2] == 'empty' || board[row + 1][col - 2].color != color)){
+			moves.push([row + 1, col - 2]);
 		}
 		if(row - 1 >= 0
-		&& (board[row - 1][col - 2] == 'empty' || board[row - 1][col - 2].color != this.color)){
-			possibleMoves.push(row - 1, col - 2);
+		&& (board[row - 1][col - 2] == 'empty' || board[row - 1][col - 2].color != color)){
+			moves.push([row - 1, col - 2]);
 		}
 	}
 	if(row - 2 >= 0){
 		if(col + 1 < 8
-		&& (board[row - 2][col + 1] == 'empty' || board[row - 2][col + 1].color != this.color)){
-			moves.push(row - 2, col + 1);
+		&& (board[row - 2][col + 1] == 'empty' || board[row - 2][col + 1].color != color)){
+			moves.push([row - 2, col + 1]);
 		}
 		if(col - 1 >= 0
-		&& (board[row - 2][col - 1] == 'empty' || board[row - 2][col - 1].color != this.color)){
-			possibleMoves.push(row - 2, col - 1);
+		&& (board[row - 2][col - 1] == 'empty' || board[row - 2][col - 1].color != color)){
+			moves.push([row - 2, col - 1]);
 		}
 	}
 	if(row + 2 < 8){
 		if(col + 1 < 8
-		&& (board[row + 2][col + 1] == 'empty' || board[row + 2][col + 1].color != this.color)){
-			moves.push(row + 2, col + 1);
+		&& (board[row + 2][col + 1] == 'empty' || board[row + 2][col + 1].color != color)){
+			moves.push([row + 2, col + 1]);
 		}
 		if(col - 1 >= 0
-		&& (board[row + 2][col - 1] == 'empty' || board[row + 2][col - 1].color != this.color)){
-			possibleMoves.push(row + 2, col - 1);
+		&& (board[row + 2][col - 1] == 'empty' || board[row + 2][col - 1].color != color)){
+			moves.push([row + 2, col - 1]);
 		}
 	}
+	let index = 0;
 	while(index < moves.length){
 		let tempBoard = copyBoard();
-		tempBoard[moves[index][0]][moves[index][1]] = new P(moves[index][0],moves[index][1],color);
+		tempBoard[moves[index][0]][moves[index][1]] = new Kn(moves[index][0],moves[index][1],color);
 		tempBoard[row][col] = 'empty';
-		if(inCheck(color)){
+		if(inCheck(tempBoard, color)){
 			moves.splice(index,1);
 		}
 		else{
@@ -322,7 +326,7 @@ function findBishopMoves(piece){
 		if(board[i][j] == 'empty'){
 			moves.push([i, j]);
 		}
-		else if(board[i][j].color != this.color){
+		else if(board[i][j].color != color){
 			moves.push([i, j]);
 			break;
 		}
@@ -334,7 +338,7 @@ function findBishopMoves(piece){
 		if(board[i][j] == 'empty'){
 			moves.push([i, j]);
 		}
-		else if(board[i][j].color != this.color){
+		else if(board[i][j].color != color){
 			moves.push([i, j]);
 			break;
 		}
@@ -346,7 +350,7 @@ function findBishopMoves(piece){
 		if(board[i][j] == 'empty'){
 			moves.push([i, j]);
 		}
-		else if(board[i][j].color != this.color){
+		else if(board[i][j].color != color){
 			moves.push([i, j]);
 			break;
 		}
@@ -358,7 +362,7 @@ function findBishopMoves(piece){
 		if(board[i][j] == 'empty'){
 			moves.push([i, j]);
 		}
-		else if(board[i][j].color != this.color){
+		else if(board[i][j].color != color){
 			moves.push([i, j]);
 			break;
 		}
@@ -366,11 +370,12 @@ function findBishopMoves(piece){
 			break;
 		}
 	}
+	let index = 0;
 	while(index < moves.length){
 		let tempBoard = copyBoard();
-		tempBoard[moves[index][0]][moves[index][1]] = new P(moves[index][0],moves[index][1],color);
+		tempBoard[moves[index][0]][moves[index][1]] = new B(moves[index][0],moves[index][1],color);
 		tempBoard[row][col] = 'empty';
-		if(inCheck(color)){
+		if(inCheck(tempBoard, color)){
 			moves.splice(index,1);
 		}
 		else{
@@ -391,7 +396,7 @@ function findQueenMoves(piece){
 		if(board[i][j] == 'empty'){
 			moves.push([i, j]);
 		}
-		else if(board[i][j].color != this.color){
+		else if(board[i][j].color != color){
 			moves.push([i, j]);
 			break;
 		}
@@ -403,7 +408,7 @@ function findQueenMoves(piece){
 		if(board[i][j] == 'empty'){
 			moves.push([i, j]);
 		}
-		else if(board[i][j].color != this.color){
+		else if(board[i][j].color != color){
 			moves.push([i, j]);
 			break;
 		}
@@ -415,7 +420,7 @@ function findQueenMoves(piece){
 		if(board[i][j] == 'empty'){
 			moves.push([i, j]);
 		}
-		else if(board[i][j].color != this.color){
+		else if(board[i][j].color != color){
 			moves.push([i, j]);
 			break;
 		}
@@ -427,7 +432,7 @@ function findQueenMoves(piece){
 		if(board[i][j] == 'empty'){
 			moves.push([i, j]);
 		}
-		else if(board[i][j].color != this.color){
+		else if(board[i][j].color != color){
 			moves.push([i, j]);
 			break;
 		}
@@ -439,7 +444,7 @@ function findQueenMoves(piece){
 		if(board[i][col] == 'empty'){
 			moves.push([i, col]);
 		}
-		else if(board[i][col].color != this.color){
+		else if(board[i][col].color != color){
 			moves.push([i, col]);
 			break;
 		}
@@ -451,7 +456,7 @@ function findQueenMoves(piece){
 		if(board[i][col] == 'empty'){
 			moves.push([i, col]);
 		}
-		else if(board[i][col].color != this.color){
+		else if(board[i][col].color != color){
 			moves.push([i, col]);
 			break;
 		}
@@ -463,7 +468,7 @@ function findQueenMoves(piece){
 		if(board[row][i] == 'empty'){
 			moves.push([row, i]);
 		}
-		else if(board[row][i].color != this.color){
+		else if(board[row][i].color != color){
 			moves.push([row, i]);
 			break;
 		}
@@ -475,7 +480,7 @@ function findQueenMoves(piece){
 		if(board[row][i] == 'empty'){
 			moves.push([row, i]);
 		}
-		else if(board[row][i].color != this.color){
+		else if(board[row][i].color != color){
 			moves.push([row, i]);
 			break;
 		}
@@ -483,11 +488,12 @@ function findQueenMoves(piece){
 			break;
 		}
 	}
+	let index = 0;
 	while(index < moves.length){
 		let tempBoard = copyBoard();
-		tempBoard[moves[index][0]][moves[index][1]] = new P(moves[index][0],moves[index][1],color);
+		tempBoard[moves[index][0]][moves[index][1]] = new Q(moves[index][0],moves[index][1],color);
 		tempBoard[row][col] = 'empty';
-		if(inCheck(color)){
+		if(inCheck(tempBoard, color)){
 			moves.splice(index,1);
 		}
 		else{
@@ -511,45 +517,46 @@ function findKingMoves(piece){
 	let col = piece.col;
 	if(row + 1 < 8
 	&& col + 1 < 8
-	&& (board[row + 1][col + 1] == 'empty' || board[row + 1][col + 1].color != this.color)){
-		moves.add([row + 1, col + 1]);
+	&& (board[row + 1][col + 1] == 'empty' || board[row + 1][col + 1].color != color)){
+		moves.push([row + 1, col + 1]);
 	}
 	if(row + 1 < 8
 	&& col - 1 >= 0
-	&& (board[row + 1][col - 1] == 'empty' || board[row + 1][col - 1].color != this.color)){
-		moves.add([row + 1, col - 1]);
+	&& (board[row + 1][col - 1] == 'empty' || board[row + 1][col - 1].color != color)){
+		moves.push([row + 1, col - 1]);
 	}
 	if(row - 1 >= 0
 	&& col - 1 >= 0
-	&& (board[row - 1][col - 1] == 'empty' || board[row - 1][col - 1].color != this.color)){
-		moves.add([row - 1, col - 1]);
+	&& (board[row - 1][col - 1] == 'empty' || board[row - 1][col - 1].color != color)){
+		moves.push([row - 1, col - 1]);
 	}
 	if(row - 1 >= 0
 	&& col + 1 < 8
-	&& (board[row - 1][col + 1] == 'empty' || board[row - 1][col + 1].color != this.color)){
-		moves.add([row - 1, col + 1]);
+	&& (board[row - 1][col + 1] == 'empty' || board[row - 1][col + 1].color != color)){
+		moves.push([row - 1, col + 1]);
 	}
 	if(row + 1 < 8
-	&& (board[row + 1][col] == 'empty' || board[row + 1][col].color != this.color)){
-		moves.add([row + 1][col]);
+	&& (board[row + 1][col] == 'empty' || board[row + 1][col].color != color)){
+		moves.push([row + 1, col]);
 	}
 	if(row - 1 >= 0
-	&& (board[row - 1][col] == 'empty' || board[row - 1][col].color != this.color)){
-		moves.add([row - 1][col]);
+	&& (board[row - 1][col] == 'empty' || board[row - 1][col].color != color)){
+		moves.push([row - 1, col]);
 	}
 	if(col + 1 < 8
-	&& (board[row][col + 1] == 'empty' || board[row][col + 1].color != this.color)){
-		moves.add([row][col + 1]);
+	&& (board[row][col + 1] == 'empty' || board[row][col + 1].color != color)){
+		moves.push([row, col + 1]);
 	}
 	if(col - 1 >= 0
-	&& (board[row][col - 1] == 'empty' || board[row][col - 1].color != this.color)){
-		moves.add([row][col - 1]);
+	&& (board[row][col - 1] == 'empty' || board[row][col - 1].color != color)){
+		moves.push([row, col - 1]);
 	}
+	let index = 0;
 	while(index < moves.length){
 		let tempBoard = copyBoard();
-		tempBoard[moves[index][0]][moves[index][1]] = new P(moves[index][0],moves[index][1],color);
+		tempBoard[moves[index][0]][moves[index][1]] = new Ki(moves[index][0],moves[index][1],color);
 		tempBoard[row][col] = 'empty';
-		if(inCheck(color)){
+		if(inCheck(tempBoard, color)){
 			moves.splice(index,1);
 		}
 		else{
@@ -563,12 +570,12 @@ function findKingMoves(piece){
 // as each other piece
 // If the king could take the piece it is pretending to be,
 // then it is in check
-function inCheck(color){
+function inCheck(boardToCheck, color){
 	let row = -1;
 	let col = -1;
 	for(let i = 0; i < 8; i++){
 		for(let j = 0; j < 8; j++){
-			if(board[i][j] instanceof Ki && board[i][j].color == color){
+			if(boardToCheck[i][j] instanceof Ki && boardToCheck[i][j].color == color){
 				row = i;
 				col = j;
 			}
@@ -578,151 +585,151 @@ function inCheck(color){
 	if(color == 'w'){
 		if(row - 1 >= 0
 		&& col - 1 >= 0
-		&& board[row - 1][col - 1] instanceof P
-		&& board[row - 1][col - 1].color == 'b'){
+		&& boardToCheck[row - 1][col - 1] instanceof P
+		&& boardToCheck[row - 1][col - 1].color == 'b'){
 			return true;
 		}
 		if(row - 1 >= 0
 		&& col + 1 < 8
-		&& board[row - 1][col + 1] instanceof P
-		&& board[row - 1][col + 1].color == 'b'){
+		&& boardToCheck[row - 1][col + 1] instanceof P
+		&& boardToCheck[row - 1][col + 1].color == 'b'){
 			return true;
 		}
 	}
 	else{
 		if(row + 1 < 8
 		&& col - 1 >= 0
-		&& board[row + 1][col - 1] instanceof P
-		&& board[row + 1][col - 1].color == 'w'){
+		&& boardToCheck[row + 1][col - 1] instanceof P
+		&& boardToCheck[row + 1][col - 1].color == 'w'){
 			return true;
 		}
 		if(row + 1 < 8
 		&& col + 1 < 8
-		&& board[row + 1][col + 1] instanceof P
-		&& board[row + 1][col + 1].color == 'w'){
+		&& boardToCheck[row + 1][col + 1] instanceof P
+		&& boardToCheck[row + 1][col + 1].color == 'w'){
 			return true;
 		}
 	}
 	//check as if rook
 	for(let i = row + 1; i < 8; i++){
-		if((board[i][col] instanceof R || board[i][col] instanceof Q)
-		&& board[i][col].color != color){
+		if((boardToCheck[i][col] instanceof R || boardToCheck[i][col] instanceof Q)
+		&& boardToCheck[i][col].color != color){
 			return true;
 		}
-		else if(typeof board[i][col] == 'object'){
+		else if(typeof boardToCheck[i][col] == 'object'){
 			break;
 		}
 	}
 	for(let i = row - 1; i >= 0; i--){
-		if((board[i][col] instanceof R || board[i][col] instanceof Q)
-		&& board[i][col].color != color){
+		if((boardToCheck[i][col] instanceof R || boardToCheck[i][col] instanceof Q)
+		&& boardToCheck[i][col].color != color){
 			return true;
 		}
-		else if(typeof board[i][col] == 'object'){
+		else if(typeof boardToCheck[i][col] == 'object'){
 			break;
 		}
 	}
 	for(let i = col + 1; i < 8; i++){
-		if((board[row][i] instanceof R || board[row][i] instanceof Q)
-		&& board[row][i].color != color){
+		if((boardToCheck[row][i] instanceof R || boardToCheck[row][i] instanceof Q)
+		&& boardToCheck[row][i].color != color){
 			return true;
 		}
-		else if(typeof board[row][i] == 'object'){
+		else if(typeof boardToCheck[row][i] == 'object'){
 			break;
 		}
 	}
 	for(let i = col - 1; i >= 0; i--){
-		if((board[row][i] instanceof R || board[row][i] instanceof Q)
-		&& board[row][i].color != color){
+		if((boardToCheck[row][i] instanceof R || boardToCheck[row][i] instanceof Q)
+		&& boardToCheck[row][i].color != color){
 			return true;
 		}
-		else if(typeof board[row][i] == 'object'){
+		else if(typeof boardToCheck[row][i] == 'object'){
 			break;
 		}
 	}
 	//check as if Knight
 	if(col + 2 < 8){
 		if(row + 1 < 8
-		&& board[row + 1][col + 2] instanceof Kn
-		&& board[row + 1][col + 2].color != color){
+		&& boardToCheck[row + 1][col + 2] instanceof Kn
+		&& boardToCheck[row + 1][col + 2].color != color){
 			return true;
 		}
 		if(row - 1 >= 0
-		&& board[row - 1][col + 2] instanceof Kn
-		&& board[row - 1][col + 2].color != color){
+		&& boardToCheck[row - 1][col + 2] instanceof Kn
+		&& boardToCheck[row - 1][col + 2].color != color){
 			return true;
 		}
 	}
 	if(col - 2 >= 0){
 		if(row + 1 < 8
-		&& board[row + 1][col - 2] instanceof Kn
-		&& board[row + 1][col - 2].color != color){
+		&& boardToCheck[row + 1][col - 2] instanceof Kn
+		&& boardToCheck[row + 1][col - 2].color != color){
 			return true;
 		}
 		if(row - 1 >= 0
-		&& board[row - 1][col - 2] instanceof Kn
-		&& board[row - 1][col - 2].color != color){
+		&& boardToCheck[row - 1][col - 2] instanceof Kn
+		&& boardToCheck[row - 1][col - 2].color != color){
 			return true;
 		}
 	}
 	if(row + 2 < 8){
 		if(col + 1 < 8
-		&& board[row + 2][col + 1] instanceof Kn
-		&& board[row + 2][col + 1].color != color){
+		&& boardToCheck[row + 2][col + 1] instanceof Kn
+		&& boardToCheck[row + 2][col + 1].color != color){
 			return true;
 		}
 		if(col - 1 >= 0
-		&& board[row + 2][col - 1] instanceof Kn
-		&& board[row + 2][col - 1].color != color){
+		&& boardToCheck[row + 2][col - 1] instanceof Kn
+		&& boardToCheck[row + 2][col - 1].color != color){
 			return true;
 		}
 	}
 	if(row - 2 >= 0){
 		if(col + 1 < 8
-		&& board[row - 2][col + 1] instanceof Kn
-		&& board[row - 2][col + 1].color != color){
+		&& boardToCheck[row - 2][col + 1] instanceof Kn
+		&& boardToCheck[row - 2][col + 1].color != color){
 			return true;
 		}
 		if(col - 1 >= 0
-		&& board[row - 2][col - 1] instanceof Kn
-		&& board[row - 2][col - 1].color != color){
+		&& boardToCheck[row - 2][col - 1] instanceof Kn
+		&& boardToCheck[row - 2][col - 1].color != color){
 			return true;
 		}
 	}
 	//check as if Bishop
 	for(let i = row + 1, j = col + 1; i < 8 && j < 8; i++, j++){
-		if((board[i][j] instanceof B || board[i][j] instanceof Q)
-		&& board[i][j].color != color){
+		if((boardToCheck[i][j] instanceof B || boardToCheck[i][j] instanceof Q)
+		&& boardToCheck[i][j].color != color){
 			return true;
 		}
-		else if(typeof board[i][j] == 'object'){
+		else if(typeof boardToCheck[i][j] == 'object'){
 			break;
 		}
 	}
 	for(let i = row + 1, j = col - 1; i < 8 && j >= 0; i++, j--){
-		if((board[i][j] instanceof B || board[i][j] instanceof Q)
-		&& board[i][j].color != color){
+		if((boardToCheck[i][j] instanceof B || boardToCheck[i][j] instanceof Q)
+		&& boardToCheck[i][j].color != color){
 			return true;
 		}
-		else if(typeof board[i][j] == 'object'){
+		else if(typeof boardToCheck[i][j] == 'object'){
 			break;
 		}
 	}
 	for(let i = row - 1, j = col - 1; i >= 0 && j >= 0; i--, j--){
-		if((board[i][j] instanceof B || board[i][j] instanceof Q)
-		&& board[i][j].color != color){
+		if((boardToCheck[i][j] instanceof B || boardToCheck[i][j] instanceof Q)
+		&& boardToCheck[i][j].color != color){
 			return true;
 		}
-		else if(typeof board[i][j] == 'object'){
+		else if(typeof boardToCheck[i][j] == 'object'){
 			break;
 		}
 	}
 	for(let i = row - 1, j = col + 1; i >= 0 && j < 8; i--, j++){
-		if((board[i][j] instanceof B || board[i][j] instanceof Q)
-		&& board[i][j].color != color){
+		if((boardToCheck[i][j] instanceof B || boardToCheck[i][j] instanceof Q)
+		&& boardToCheck[i][j].color != color){
 			return true;
 		}
-		else if(typeof board[i][j] == 'object'){
+		else if(typeof boardToCheck[i][j] == 'object'){
 			break;
 		}
 	}
@@ -730,38 +737,38 @@ function inCheck(color){
 	//Check as if king
 	if(row + 1 < 8
 	&& col + 1 < 8
-	&& board[row + 1][col + 1] instanceof Ki){
+	&& boardToCheck[row + 1][col + 1] instanceof Ki){
 		return true;
 	}
 	if(row + 1 < 8
 	&& col - 1 >= 0
-	&& board[row + 1][col - 1] instanceof Ki){
+	&& boardToCheck[row + 1][col - 1] instanceof Ki){
 		return true;
 	}
 	if(row - 1 >= 0
 	&& col - 1 >= 0
-	&& board[row - 1][col - 1] instanceof Ki){
+	&& boardToCheck[row - 1][col - 1] instanceof Ki){
 		return true;
 	}
 	if(row - 1 >= 0
 	&& col + 1 < 8
-	&& board[row - 1][col + 1] instanceof Ki){
+	&& boardToCheck[row - 1][col + 1] instanceof Ki){
 		return true;
 	}
 	if(row + 1 < 8
-	&& board[row + 1][col] instanceof Ki){
+	&& boardToCheck[row + 1][col] instanceof Ki){
 		return true;
 	}
 	if(row - 1 >= 0
-	&& board[row - 1][col] instanceof Ki){
+	&& boardToCheck[row - 1][col] instanceof Ki){
 		return true;
 	}
 	if(col + 1 < 8
-	&& board[row][col + 1] instanceof Ki){
+	&& boardToCheck[row][col + 1] instanceof Ki){
 		return true;
 	}
 	if(col - 1 >= 0
-	&& board[row][col - 1] instanceof Ki){
+	&& boardToCheck[row][col - 1] instanceof Ki){
 		return true;
 	}
 	//at this point, we can assume the king is not in check
@@ -772,10 +779,18 @@ function inCheck(color){
 // appropriate html cells
 function startGame(){
 	initializeNewBoard();
+	turn = 'w';
+	drawBoard();
+}
+
+function drawBoard(){
 	for(let i = 0; i < board.length; i++){
 		for(let j = 0; j < board[0].length; j++){
 			if((i + j) % 2 == 0){
 				document.getElementById(String(i)+String(j)).bgColor = "LightGray";
+			}
+			else{
+				document.getElementById(String(i)+String(j)).bgColor = "White";
 			}
 			if(typeof board[i][j] == 'object' && board[i][j].color == 'w'){
 				if(board[i][j] instanceof P){
@@ -817,9 +832,68 @@ function startGame(){
 					document.getElementById(String(i)+String(j)).innerHTML = '<img src="content/black_king.png" style="height: 40px"/>';
 				}
 			}
+			else{
+				document.getElementById(String(i)+String(j)).innerHTML = '';
+			}
 		}
 	}
 }
 	
 	
+function spaceClicked(){
+	let id = event.target.id;
+	if(id == ''){
+		id = event.target.parentElement.id;
+	}
+	let row = Math.trunc(Number(id) / 10);
+	let col = Number(id) % 10;
+	if(selectedPiece == null)
+	{
+		if(typeof board[row][col] == 'object'
+		&& board[row][col].color == turn){
+			selectedPiece = board[row][col];
+			movementOptions = findLegalMoves(selectedPiece);
+			if(movementOptions.length == 0){
+				selectedPiece = null;
+				return;
+			}
+			for(let i = 0; i < movementOptions.length; i++){
+				if((movementOptions[i][0] + movementOptions[i][1]) % 2 == 0){
+					document.getElementById(String(movementOptions[i][0])+String(movementOptions[i][1])).bgColor = "DarkGreen";
+				}
+				else{
+					document.getElementById(String(movementOptions[i][0])+String(movementOptions[i][1])).bgColor = "Chartreuse";
+				}
+			}
+		}
+	}
+	else if(selectedPiece != null){
+		for(let i = 0; i < movementOptions.length; i++){
+			if(row == movementOptions[i][0] && col == movementOptions[i][1]){
+				movePiece(selectedPiece, row, col);
+				if(turn == 'w'){
+					turn = 'b';
+				}
+				else{
+					turn = 'w';
+				}
+				return;
+			}
+		}
+		selectedPiece = null;
+		movementOptions = null;
+		drawBoard();
+	}
+}
 	
+function movePiece(piece, targetRow, targetCol){
+	let startRow = piece.row;
+	let startCol = piece.col;
+	board[targetRow][targetCol] = piece;
+	board[startRow][startCol] = 'empty';
+	piece.row = targetRow;
+	piece.col = targetCol;
+	selectedPiece = null;
+	movementOptions = null;
+	drawBoard();
+}
