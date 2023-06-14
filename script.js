@@ -118,6 +118,23 @@ function findLegalMoves(piece){
 	}
 }
 
+// returns a 2D array of all legal chess moves for a given color
+function findAllLegalMoves(color){
+	let allMoves = [];
+	for(let i = 0; i < board.length; i++){
+		for(let j = 0; j < board[0].length; j++){
+			if(typeof board[i][j] == 'object'
+			&& board[i][j].color == color){
+				let currentPieceMoves = findLegalMoves(board[i][j]);
+				for(let k = 0; k < currentPieceMoves.length; k++){
+					allMoves.push([currentPieceMoves[k][0],currentPieceMoves[k][1]]);
+				}
+			}
+		}
+	}
+	return allMoves;
+}
+			
 // Pawn movement rules:
 // Typically move one space toward enemy side if unobstructed
 // Can move two spaces if on starting file
@@ -889,6 +906,7 @@ function spaceClicked(){
 function movePiece(piece, targetRow, targetCol){
 	let startRow = piece.row;
 	let startCol = piece.col;
+	let color = piece.color;
 	board[targetRow][targetCol] = piece;
 	board[startRow][startCol] = 'empty';
 	piece.row = targetRow;
@@ -896,4 +914,28 @@ function movePiece(piece, targetRow, targetCol){
 	selectedPiece = null;
 	movementOptions = null;
 	drawBoard();
+	if(color == 'w'){
+		if(inCheck(board, 'b')
+		&& findAllLegalMoves('b').length > 0){
+			document.getElementById('check_alert').innerHTML = 'Black is in check!';
+		}
+		else if(inCheck(board, 'b')){
+			document.getElementById('check_alert').innerHTML = 'Black is in checkmate!  White wins!';
+		}
+		else{
+			document.getElementById('check_alert').innerHTML = '';
+		}
+	}
+	else{
+		if(inCheck(board, 'w')
+		&& findAllLegalMoves('w').length > 0){
+			document.getElementById('check_alert').innerHTML = 'White is in check!';
+		}
+		else if(inCheck(board, 'w')){
+			document.getElementById('check_alert').innerHTML = 'White is in checkmate!  Black wins!';
+		}
+		else{
+			document.getElementById('check_alert').innerHTML = '';
+		}
+	}
 }
