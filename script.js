@@ -4,6 +4,7 @@ var selectedPiece;
 var movementOptions;
 // last move is formatted as piece-.-color-start row-start col-end row-end col
 var lastMove;
+var waitingOnPromotion;
 
 // returns a 2D array thats a copy of the current chess board
 // for the sake of checking legal moves
@@ -623,7 +624,6 @@ function findKingMoves(piece){
 			}
 		}
 	}
-	console.log(moves);
 	let index = 0;
 	while(index < moves.length){
 		let tempBoard = copyBoard();
@@ -861,6 +861,7 @@ function inCheck(boardToCheck, color){
 function startGame(){
 	initializeNewBoard();
 	turn = 'w';
+	waitingOnPromotion = false;
 	drawBoard();
 }
 
@@ -927,6 +928,9 @@ function spaceClicked(){
 	}
 	let row = Math.trunc(Number(id) / 10);
 	let col = Number(id) % 10;
+	if(waitingOnPromotion){
+		return;
+	}
 	if(selectedPiece == null)
 	{
 		if(typeof board[row][col] == 'object'
@@ -954,21 +958,23 @@ function spaceClicked(){
 				&& selectedPiece.col != col
 				&& board[row][col] == 'empty'){
 					enPassant(selectedPiece, row, col);
+					return;
 				}
 				else if(selectedPiece instanceof Ki
 				&& Math.abs(selectedPiece.col - col) == 2){
 					castle(selectedPiece, row, col);
+					selectedPiece.hasMoved = true;
+					return;
+				}
+				else if(selectedPiece instanceof P
+				&& (row == 7 || row == 0)){
+					initiatePromotion(selectedPiece, row, col);
+					return;
 				}
 				else{
 					movePiece(selectedPiece, row, col);
+					return;
 				}
-				if(turn == 'w'){
-					turn = 'b';
-				}
-				else{
-					turn = 'w';
-				}
-				return;
 			}
 		}
 		selectedPiece = null;
@@ -1032,6 +1038,12 @@ function movePiece(piece, targetRow, targetCol){
 			document.getElementById('check_alert').innerHTML = '';
 		}
 	}
+	if(turn == 'w'){
+		turn = 'b';
+	}
+	else{
+		turn = 'w';
+	}
 }
 
 function enPassant(piece, targetRow, targetCol){
@@ -1076,8 +1088,15 @@ function enPassant(piece, targetRow, targetCol){
 			document.getElementById('check_alert').innerHTML = '';
 		}
 	}
+	if(turn == 'w'){
+		turn = 'b';
+	}
+	else{
+		turn = 'w';
+	}
 }
 
+// identified by a king moving two columns from starting column
 function castle(piece, targetRow, targetCol){
 	let startRow = piece.row;
 	let startCol = piece.col;
@@ -1122,5 +1141,81 @@ function castle(piece, targetRow, targetCol){
 			document.getElementById('check_alert').innerHTML = '';
 		}
 	}
+	if(turn == 'w'){
+		turn = 'b';
+	}
+	else{
+		turn = 'w';
+	}
 }
 	
+function initiatePromotion(piece, targetRow, targetCol){
+	let startRow = piece.row;
+	let startCol = piece.col;
+	let color = piece.color;
+	lastMove = 'P.'+color+startRow+startCol+targetRow+targetCol;
+	waitingOnPromotion = true;
+	document.getElementById('promote').style="display: block";
+	board[targetRow][targetCol] = piece;
+	board[startRow][startCol] = 'empty';
+	piece.row = targetRow;
+	piece.col = targetCol;
+	selectedPiece = null;
+	movementOptions = null;
+	drawBoard();
+}
+
+function promote(pieceToBecome){
+	let promotionColor = lastMove.substring(lastMove.indexOf('.') + 1, lastMove.indexOf('.') + 2);
+	let promotionRow = Number(lastMove.substring(lastMove.indexOf('.') + 4, lastMove.indexOf('.') + 5));
+	let promotionCol = Number(lastMove.substring(lastMove.indexOf('.') + 5, lastMove.indexOf('.') + 6));
+	switch(pieceToBecome){
+		case 'R':
+			board[promotionRow][promotionCol] = new R(promotionRow, promotionCol, promotionColor, true);
+			break;
+		case 'Kn':
+			board[promotionRow][promotionCol] = new Kn(promotionRow, promotionCol, promotionColor);
+			break;
+		case 'B':
+			board[promotionRow][promotionCol] = new B(promotionRow, promotionCol, promotionColor);
+			break;
+		case 'Q':
+			board[promotionRow][promotionCol] = new Q(promotionRow, promotionCol, promotionColor);
+			break;
+		default:
+			break;
+	}
+	drawBoard();
+	if(promotionColor == 'w'){
+		if(inCheck(board, 'b')
+		&& findAllLegalMoves('b').length > 0){
+			document.getElementById('check_alert').innerHTML = 'Black is in check!';
+		}
+		else if(inCheck(board, 'b')){
+			document.getElementById('check_alert').innerHTML = 'Black is in checkmate!  White wins!';
+		}
+		else{
+			document.getElementById('check_alert').innerHTML = '';
+		}
+	}
+	else{
+		if(inCheck(board, 'w')
+		&& findAllLegalMoves('w').length > 0){
+			document.getElementById('check_alert').innerHTML = 'White is in check!';
+		}
+		else if(inCheck(board, 'w')){
+			document.getElementById('check_alert').innerHTML = 'White is in checkmate!  Black wins!';
+		}
+		else{
+			document.getElementById('check_alert').innerHTML = '';
+		}
+	}
+	if(turn == 'w'){
+		turn = 'b';
+	}
+	else{
+		turn = 'w';
+	}
+	document.getElementById('promote').style='display: none';
+	waitingOnPromotion = false;	
+}
